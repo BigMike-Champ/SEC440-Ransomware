@@ -4,29 +4,26 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 import os
-import Privkey
-list = os.listdir(path='.')
-list.remove("KeyGen.py")
-list.remove("Decrypt.py")
-list.remove("Privkey.py")
 
-Privkey.private()
 
-# Decrypt file
-for x in list:
-    original_message = Privkey.private_key.decrypt(
-            x,
-            padding.OAEP(
-                mgf=padding.MGF1(algorithm=hashes.SHA256()),
-                algorithm=hashes.SHA256(),
-                label=None
-            )
+with open("private_key.pem", "rb") as key_file:
+    private_key = serialization.load_pem_private_key(
+        key_file.read(),
+        password=None,
+        backend=default_backend()
+    )
+
+file = open("text1.txt.enc", "rb")
+original_message = private_key.decrypt(
+        file.read(),
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
         )
+    )
+file.close()
+file2 = open("text1.txt", "wb")
+file2.write(original_message)
 
-# Checking the results
-# newFile1 = open("newtext.txt", "wb")
-# newFile1.write(original_message)
-
-# Make new text1.txt file
-# newFile1 = open("text1.txt", "w")
-# newFile1.write("here")
+print(original_message)
